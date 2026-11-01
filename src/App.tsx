@@ -12,14 +12,24 @@ const FALLBACK_TIERS: Tier[] = [
 ];
 const money = (n: number) => `$${n % 1 ? n.toFixed(2) : n}`;
 
+function Logo({ small = false }: { small?: boolean }) {
+  return (
+    <a href="/" className={`brand${small ? " sm" : ""}`} aria-label="Canal home">
+      <img src="/canal-wordmark.svg" alt="Canal" width={small ? 92 : 112} height={small ? 27 : 33} />
+      {!small && <span className="tag">Your AI. Your rules.</span>}
+    </a>
+  );
+}
+
 function Header() {
   return (
     <header className="top">
       <div className="wrap row">
-        <a href="/" className="logo" aria-label="Canal home">Canal</a>
+        <Logo />
         <nav aria-label="Main">
-          <a href="/#how">How it works</a>
-          <a href="/#pricing">Beta</a>
+          <a className="hide-sm" href="/#how">How it works</a>
+          <a className="hide-sm" href="/#features">Features</a>
+          <a className="hide-sm" href="/#pricing">Beta</a>
           <a className="btn small" href={APP_URL}>Sign in</a>
         </nav>
       </div>
@@ -31,7 +41,7 @@ function Footer() {
   return (
     <footer className="foot">
       <div className="wrap row">
-        <span>© {new Date().getFullYear()} Canal</span>
+        <div className="foot-brand"><Logo small /><span>© {new Date().getFullYear()} Watch1Do1 LLC</span></div>
         <nav aria-label="Legal"><a href="/privacy">Privacy</a> <a href="/terms">Terms</a> <a href="/10dlc">What is 10DLC?</a> <a href={APP_URL}>Sign in</a></nav>
       </div>
     </footer>
@@ -80,31 +90,63 @@ function Waitlist() {
   );
 }
 
+const FEATURES = [
+  { icon: "👥", t: "Contact groups", d: "Sort people into Family, Work, VIP, or your own custom groups. Each group gets its own rules for what your AI may answer, book, or share." },
+  { icon: "🛡️", t: "Spam and stranger screening", d: "Unknown senders follow your choice: a polite holding note, ask you first, or ignore. Daily limits and blocked topics are enforced by Canal." },
+  { icon: "🤖", t: "Your own AI bot", d: "Connect the assistant you already use. Switch bots anytime and keep your number, email, contacts, and rules." },
+  { icon: "💬", t: "Works by text and email", d: "One phone number and one email address for your assistant. Messages arrive in one place, screened the same way." },
+];
+
 function Home() {
   const status = useBetaStatus();
   const tiers = status?.tiers?.length ? status.tiers : FALLBACK_TIERS;
   return (
     <main id="main">
       <section className="hero">
-        <div className="wrap">
-          <h1>A real phone number and email address for your AI assistant.</h1>
-          <p className="lead">People text or email it like anyone else. Canal screens out the spam and the strangers, and your AI gets what matters.</p>
-          <div className="cta"><a className="btn" href="#waitlist">Join the waitlist</a><a className="btn ghost" href={APP_URL}>Sign in</a></div>
+        <div className="wrap hero-grid">
+          <div>
+            <p className="eyebrow">Private beta</p>
+            <h1>You already have an AI. <span className="grad">Give it a number.</span></h1>
+            <p className="lead">Canal gives your AI assistant its own phone number and email address. People text or email it like anyone else. Canal screens out the spam and the strangers, and your AI gets what matters.</p>
+            <div className="cta"><a className="btn" href="#waitlist">Join the waitlist</a><a className="btn ghost" href="#how">See how it works</a></div>
+            {status && (
+              <p className="counter" role="status" aria-live="polite">
+                {status.open && status.currentTier
+                  ? <><strong>{status.spotsLeft}</strong> beta spot{status.spotsLeft === 1 ? "" : "s"} left at {money(status.currentTier.price)}</>
+                  : <>Current beta spots are full. Join the waitlist for the next batch.</>}
+              </p>
+            )}
+          </div>
+          <div className="hero-card" aria-hidden="true">
+            <img src="/icon-512.png" alt="" width={160} height={160} />
+            <div className="bubble in">Hey, are you free Thursday?</div>
+            <div className="bubble note">✓ Screened · Group: Work</div>
+            <div className="bubble out">Passed to your AI</div>
+          </div>
         </div>
       </section>
 
       <section id="how" className="wrap">
         <h2>How it works</h2>
         <ol className="steps">
-          <li><h3>Pick your number and email</h3><p>Choose a phone number and an address that belong to you, not to any one app.</p></li>
-          <li><h3>Canal screens every message</h3><p>Your contacts and rules decide who gets through. Spam and unknown senders are held, not passed along.</p></li>
-          <li><h3>Your AI gets what matters</h3><p>Approved messages go straight to your assistant, sorted and ready to act on.</p></li>
+          <li><h3>Pick your number and email</h3><p>Choose a phone number and an address for your assistant that belong to you, not to any one app.</p></li>
+          <li><h3>Set your rules</h3><p>Put people in groups and decide who gets through. Spam and unknown senders are held or ignored, your choice.</p></li>
+          <li><h3>Your AI gets what matters</h3><p>Screened messages go to your assistant. Replies are off by default; you turn them on when you're ready.</p></li>
         </ol>
       </section>
 
+      <section id="features" className="wrap">
+        <h2>Built for people who let AI do things</h2>
+        <div className="features">
+          {FEATURES.map((f) => (
+            <div className="feature" key={f.t}><span className="ficon" aria-hidden="true">{f.icon}</span><h3>{f.t}</h3><p>{f.d}</p></div>
+          ))}
+        </div>
+      </section>
+
       <section className="wrap band">
-        <h2>Works with any AI</h2>
-        <p>Connect the assistant you like today. If you switch tomorrow, your number, your email, your contacts and your rules stay right where they are. Your identity is yours, not your bot's.</p>
+        <h2>Receive-only by default</h2>
+        <p>Your assistant can read every screened text and email from day one. Letting it reply by text is your choice, and it starts once carrier registration is approved. <a href="/10dlc">What is 10DLC?</a></p>
       </section>
 
       <section className="wrap">
@@ -140,9 +182,11 @@ function Home() {
       </section>
 
       <section id="waitlist" className="wrap">
-        <h2>Get on the waitlist</h2>
-        <p>It's free. We send invites in batches as each tier opens.</p>
-        <Waitlist />
+        <div className="wl-card">
+          <h2>Get on the waitlist</h2>
+          <p>It's free. We send invites in batches as each tier opens.</p>
+          <Waitlist />
+        </div>
       </section>
     </main>
   );
