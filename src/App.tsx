@@ -1,6 +1,6 @@
 import { useEffect, useState, FormEvent } from "react";
 import { APP_URL, API_BASE } from "./config";
-import { LegalDraft } from "./pages/Legal";
+import { LegalPageView } from "./pages/Legal";
 
 type Tier = { index: number; from: number; to: number; price: number };
 type Status = { open: boolean; spotsTaken: number; spotsLeft: number; currentTier: { index: number; price: number } | null; tiers: Tier[] };
@@ -32,7 +32,7 @@ function Footer() {
     <footer className="foot">
       <div className="wrap row">
         <span>© {new Date().getFullYear()} Canal</span>
-        <nav aria-label="Legal"><a href="/privacy">Privacy (draft)</a> <a href="/terms">Terms (draft)</a> <a href={APP_URL}>Sign in</a></nav>
+        <nav aria-label="Legal"><a href="/privacy">Privacy</a> <a href="/terms">Terms</a> <a href="/10dlc">What is 10DLC?</a> <a href={APP_URL}>Sign in</a></nav>
       </div>
     </footer>
   );
@@ -115,7 +115,7 @@ function Home() {
           <li>There's no admin screen that shows your messages.</li>
           <li>You can see the erasure counts yourself in your Settings.</li>
         </ul>
-        <p><a href="/privacy">Read the privacy page (draft)</a></p>
+        <p><a href="/privacy">Read the privacy policy</a></p>
       </section>
 
       <section id="pricing" className="wrap band">
@@ -154,7 +154,7 @@ export default function App() {
     <>
       <a className="skip" href="#main">Skip to content</a>
       <Header />
-      {path === "/privacy" ? <LegalDraft title="Privacy" /> : path === "/terms" ? <LegalDraft title="Terms" /> : <Home />}
+      {path === "/privacy" ? <LegalPageView page="privacy" /> : path === "/terms" ? <LegalPageView page="terms" /> : path === "/10dlc" || path === "/what-is-10dlc" ? <LegalPageView page="10dlc" /> : <Home />}
       <Footer />
     </>
   );

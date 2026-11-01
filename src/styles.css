@@ -28,3 +28,10 @@ a{color:var(--brand2)}a:focus-visible,button:focus-visible,input:focus-visible{o
 .skip{position:absolute;left:-999px}.skip:focus{left:1rem;top:1rem;background:#fff;padding:.5rem;z-index:10}
 .legal{padding:2rem 1.25rem}.draft{background:#fef3c7;border:1px solid #f59e0b;padding:.8rem 1rem;border-radius:10px}
 @media(min-width:720px){.steps{grid-template-columns:repeat(3,1fr)}}
+
+/* Legal pages rendered from Markdown */
+.legal-body h1 { margin-bottom: .75rem; }
+.legal-body h2 { margin: 1.75rem 0 .5rem; font-size: 1.2rem; }
+.legal-body p, .legal-body li { line-height: 1.6; }
+.legal-body ul, .legal-body ol { padding-left: 1.4rem; margin: .5rem 0; }
+.legal-body li { margin: .3rem 0; }

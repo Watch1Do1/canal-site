@@ -1,1 +1,1 @@
-{ "rewrites": [{ "source": "/(privacy|terms)", "destination": "/index.html" }] }
+{ "rewrites": [{ "source": "/(privacy|terms|10dlc|what-is-10dlc)", "destination": "/index.html" }] }
