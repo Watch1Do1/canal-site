@@ -1,1 +1,7 @@
-{ "rewrites": [{ "source": "/(privacy|terms|10dlc|what-is-10dlc)", "destination": "/index.html" }] }
+{
+  "redirects": [
+    { "source": "/llms.txt", "destination": "https://app.getcanal.app/llms.txt", "permanent": true },
+    { "source": "/llms-full.txt", "destination": "https://app.getcanal.app/llms.txt", "permanent": true }
+  ],
+  "rewrites": [{ "source": "/(privacy|terms|10dlc|what-is-10dlc)", "destination": "/index.html" }]
+}
