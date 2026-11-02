@@ -1,4 +1,4 @@
-import { useEffect, useState, FormEvent } from "react";
+import { useEffect, useRef, useState, FormEvent } from "react";
 import { APP_URL, API_BASE } from "./config";
 import { LegalPageView } from "./pages/Legal";
 
@@ -61,22 +61,80 @@ function useBetaStatus() {
   return s;
 }
 
+const TURNSTILE_SITE_KEY = "0x4AAAAAAFwA-9P8Rel6xqai";
+const TURNSTILE_SRC = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (el: HTMLElement, opts: Record<string, unknown>) => string;
+      reset: (id?: string) => void;
+      remove: (id?: string) => void;
+    };
+  }
+}
+
+let turnstileLoader: Promise<void> | null = null;
+function loadTurnstile(): Promise<void> {
+  if (window.turnstile) return Promise.resolve();
+  if (!turnstileLoader) {
+    turnstileLoader = new Promise((resolve, reject) => {
+      const sc = document.createElement("script");
+      sc.src = TURNSTILE_SRC; sc.async = true; sc.defer = true;
+      sc.onload = () => resolve();
+      sc.onerror = () => { turnstileLoader = null; reject(new Error("turnstile load failed")); };
+      document.head.appendChild(sc);
+    });
+  }
+  return turnstileLoader;
+}
+
 function Waitlist() {
   const [state, setState] = useState<"idle" | "sending" | "done" | "error">("idle");
   const [msg, setMsg] = useState("");
+  const [token, setToken] = useState("");
+  const [checkFailed, setCheckFailed] = useState(false);
+  const boxRef = useRef<HTMLDivElement>(null);
+  const widgetId = useRef<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    loadTurnstile().then(() => {
+      if (cancelled || !boxRef.current || !window.turnstile || widgetId.current) return;
+      widgetId.current = window.turnstile.render(boxRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: (t: string) => { setToken(t); setCheckFailed(false); },
+        "expired-callback": () => setToken(""),
+        "error-callback": () => { setToken(""); setCheckFailed(true); },
+      });
+    }).catch(() => { if (!cancelled) setCheckFailed(true); });
+    return () => {
+      cancelled = true;
+      if (widgetId.current && window.turnstile) window.turnstile.remove(widgetId.current);
+      widgetId.current = null;
+    };
+  }, []);
+
+  function resetCheck() {
+    setToken("");
+    if (widgetId.current && window.turnstile) window.turnstile.reset(widgetId.current);
+  }
+
   async function submit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (!token) { setMsg("Please complete the quick human check first."); setState("error"); return; }
     const f = new FormData(e.currentTarget);
     setState("sending");
     try {
       const r = await fetch(`${API_BASE}/public/waitlist`, {
         method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name: f.get("name"), email: f.get("email"), website: f.get("website"), source: "site" }),
+        body: JSON.stringify({ name: f.get("name"), email: f.get("email"), website: f.get("website"), source: "site", turnstileToken: token }),
       });
       const j = await r.json().catch(() => ({}));
       if (r.ok && j.ok) { setState("done"); return; }
       setMsg(j.error || "Something went wrong. Please try again."); setState("error");
-    } catch { setMsg("Couldn't reach Canal. Please try again in a minute."); setState("error"); }
+      resetCheck();
+    } catch { setMsg("Couldn't reach Canal. Please try again in a minute."); setState("error"); resetCheck(); }
   }
   if (state === "done") return <p className="ok" role="status">You're on the list. We'll email you when your invite is ready.</p>;
   return (
@@ -84,7 +142,9 @@ function Waitlist() {
       <label>Your name<input name="name" required maxLength={80} autoComplete="name" /></label>
       <label>Email<input name="email" type="email" required maxLength={254} autoComplete="email" /></label>
       <div className="hp" aria-hidden="true"><label>Website<input name="website" tabIndex={-1} autoComplete="off" /></label></div>
-      <button className="btn" disabled={state === "sending"}>{state === "sending" ? "Joining…" : "Join the waitlist"}</button>
+      <div ref={boxRef} className="ts" />
+      {checkFailed && <p className="err" role="alert">The human check didn't load. Please refresh the page and try again.</p>}
+      <button className="btn" disabled={state === "sending" || !token}>{state === "sending" ? "Joining…" : token ? "Join the waitlist" : "Complete the check above"}</button>
       {state === "error" && <p className="err" role="alert">{msg}</p>}
     </form>
   );
