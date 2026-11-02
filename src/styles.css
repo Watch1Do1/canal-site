@@ -63,3 +63,9 @@ nav .btn.small{padding:.45rem 1rem;color:#fff;min-height:0}
 section.wrap{padding-top:3rem;padding-bottom:3rem}
 section.wrap.band{width:calc(100% - 2.5rem);max-width:calc(1040px - 2.5rem);margin:1rem auto;padding:2rem 1.75rem}
 @media(max-width:560px){section.wrap.band{padding:1.5rem 1.1rem}}
+@media(min-width:720px){.features.why{grid-template-columns:repeat(3,1fr)}}
+.test-ai-link{margin-top:1rem}.small-btn{padding:.35rem .9rem;min-height:0;font-size:.9rem}
+.test-ai{padding-top:2.5rem;padding-bottom:3rem}.test-ai .wl-card{margin:1rem 0}
+.test-status.connected{border-color:#10b981;background:#ecfdf5}.test-status.signed_in{border-color:#f59e0b;background:#fffbeb}
+.big-code{font-size:1.3rem;letter-spacing:.12em;font-weight:700}
+.test-steps{border:1px solid var(--border);border-radius:14px;padding:.75rem 1rem;margin:.6rem 0;background:var(--surface)}.test-steps summary{font-weight:600;cursor:pointer}

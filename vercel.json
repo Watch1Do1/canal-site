@@ -13,7 +13,7 @@
   ],
   "rewrites": [
     {
-      "source": "/(privacy|terms|10dlc|what-is-10dlc)",
+      "source": "/(privacy|terms|10dlc|what-is-10dlc|test-your-ai)",
       "destination": "/index.html"
     }
   ],
