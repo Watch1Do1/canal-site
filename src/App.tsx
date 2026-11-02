@@ -233,6 +233,19 @@ function Home() {
         <p className="small">Beta limits: receiving only, and up to 300 texts and 300 emails per month.</p>
       </section>
 
+      <section id="texting-faq" className="wrap">
+        <h2>Outbound texting fees, explained</h2>
+        <p className="small">Straight answers about carrier registration. See <a href="/10dlc">What is 10DLC?</a></p>
+        <div className="faq">
+          <details className="faq-item"><summary>Why does outbound texting cost extra to set up?</summary><p>US carriers require every business that sends texts from an app to register, so they can block spam. We register you, and the carriers charge one-time fees for that, which we pass through at cost.</p></details>
+          <details className="faq-item"><summary>Do I pay this if I only receive texts?</summary><p>No. Receiving texts needs no registration, so you only pay your plan.</p></details>
+          <details className="faq-item"><summary>Why is there a monthly fee for sending texts?</summary><p>Carriers charge a small monthly fee to keep your registration active, and it stops when you turn outbound texting off.</p></details>
+          <details className="faq-item"><summary>What if my registration gets rejected?</summary><p>We help you set it up correctly the first time with approved templates. If carriers ask for changes, they charge the vetting fee again when it&apos;s resubmitted.</p></details>
+          <details className="faq-item"><summary>Is any of this refundable?</summary><p>Carriers don&apos;t refund registration fees, so we can&apos;t either. That&apos;s why you only sign up for outbound texting if you want it.</p></details>
+          <details className="faq-item"><summary>Why do I get so much spam if this is required?</summary><p>Spammers usually skip registration, and carriers filter or block them more and more. Registering is what keeps your texts from being treated the same way.</p></details>
+        </div>
+      </section>
+
       <section id="waitlist" className="wrap">
         <div className="wl-card">
           <h2>Get on the waitlist</h2>
