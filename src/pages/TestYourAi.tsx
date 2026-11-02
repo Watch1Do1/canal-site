@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { API_BASE } from "../config";
 import { TURNSTILE_SITE_KEY, loadTurnstile } from "../turnstile";
 
@@ -30,6 +30,108 @@ const STEPS: { name: string; steps: string[] }[] = [
     "If your app has no such setting, or only takes a fixed API key, this test can't pass yet.",
   ] },
 ];
+
+const AI_OPTIONS: [string, string][] = [
+  ["claude", "Claude"], ["chatgpt", "ChatGPT"], ["cursor", "Cursor"],
+  ["vscode_copilot", "VS Code Copilot"], ["grok", "Grok"], ["other", "Other"],
+];
+const STEP_OPTIONS: [string, string][] = [
+  ["add_url", "Adding the URL"], ["sign_in", "Sign-in"], ["tool_call", "Tool call"], ["other", "Other"],
+];
+
+function ReportForm({ testCode }: { testCode: string }) {
+  const [open, setOpen] = useState(false);
+  const [ai, setAi] = useState("");
+  const [aiOther, setAiOther] = useState("");
+  const [step, setStep] = useState("");
+  const [error, setError] = useState("");
+  const [email, setEmail] = useState("");
+  const [website, setWebsite] = useState("");
+  const [token, setToken] = useState("");
+  const [checkFailed, setCheckFailed] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+  const [done, setDone] = useState(false);
+  const boxRef = useRef<HTMLDivElement>(null);
+  const widgetId = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!open || done) return;
+    let cancelled = false;
+    loadTurnstile().then(() => {
+      if (cancelled || !boxRef.current || !window.turnstile || widgetId.current) return;
+      widgetId.current = window.turnstile.render(boxRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: (t: string) => { setToken(t); setCheckFailed(false); },
+        "expired-callback": () => setToken(""),
+        "error-callback": () => { setToken(""); setCheckFailed(true); },
+      });
+    }).catch(() => { if (!cancelled) setCheckFailed(true); });
+    return () => {
+      cancelled = true;
+      if (widgetId.current && window.turnstile) window.turnstile.remove(widgetId.current);
+      widgetId.current = null;
+    };
+  }, [open, done]);
+
+  async function submit(e: FormEvent) {
+    e.preventDefault();
+    setErr("");
+    if (!ai) { setErr("Please choose which AI or app you tried."); return; }
+    if (ai === "other" && !aiOther.trim()) { setErr("Please tell us which AI or app you tried."); return; }
+    if (!step) { setErr("Please choose where it stopped working."); return; }
+    setBusy(true);
+    try {
+      const r = await fetch(`${API_BASE}/public/compat-report`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ai, aiOther: ai === "other" ? aiOther : "", step, error, email, testCode, website, turnstileToken: token }),
+      });
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok || !j.ok) {
+        setErr(j.error || "Something went wrong. Please try again.");
+        setToken("");
+        if (widgetId.current && window.turnstile) window.turnstile.reset(widgetId.current);
+        return;
+      }
+      setDone(true);
+    } catch { setErr("Couldn't reach Canal. Please try again in a minute."); }
+    finally { setBusy(false); }
+  }
+
+  if (done) return <div className="wl-card" role="status"><p>Thanks, we got it. We'll use this to improve compatibility.</p></div>;
+  if (!open) return <p><button className="btn ghost small-btn" onClick={() => setOpen(true)}>Didn't work? Tell us</button></p>;
+  return (
+    <form className="wl-card report-form" onSubmit={submit}>
+      <h2>Didn't work? Tell us</h2>
+      <label>Which AI or app did you try?
+        <select value={ai} onChange={(e) => setAi(e.target.value)} required>
+          <option value="">Choose one</option>
+          {AI_OPTIONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+        </select>
+      </label>
+      {ai === "other" && <label>Which one?
+        <input type="text" value={aiOther} maxLength={80} onChange={(e) => setAiOther(e.target.value)} required />
+      </label>}
+      <label>Where did it stop working?
+        <select value={step} onChange={(e) => setStep(e.target.value)} required>
+          <option value="">Choose one</option>
+          {STEP_OPTIONS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+        </select>
+      </label>
+      <label>Error message (optional)
+        <textarea value={error} maxLength={500} rows={3} onChange={(e) => setError(e.target.value)} />
+      </label>
+      <label>Email, if you'd like us to follow up (optional)
+        <input type="email" value={email} maxLength={254} autoComplete="email" onChange={(e) => setEmail(e.target.value)} />
+      </label>
+      <input type="text" name="website" value={website} onChange={(e) => setWebsite(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ position: "absolute", left: "-9999px" }} />
+      <div ref={boxRef} className="ts" />
+      {checkFailed && <p className="err" role="alert">The human check didn't load. Please refresh the page and try again.</p>}
+      <button className="btn" type="submit" disabled={busy || !token}>{busy ? "Sending…" : token ? "Send report" : "Complete the check above"}</button>
+      {err && <p className="err" role="alert">{err}</p>}
+    </form>
+  );
+}
 
 export function TestYourAi() {
   const [token, setToken] = useState("");
@@ -105,6 +207,7 @@ export function TestYourAi() {
       <p className="lead">Before you sign up, check that your AI app can connect to Canal. The test uses the same sign-in steps as a real connection, with a test server that has no messages or accounts in it.</p>
 
       {!code ? (
+        <>
         <div className="wl-card">
           <h2>1. Get a test code</h2>
           <div ref={boxRef} className="ts" />
@@ -112,6 +215,8 @@ export function TestYourAi() {
           <button className="btn" disabled={busy || !token} onClick={start}>{busy ? "Getting a code…" : token ? "Get my test code" : "Complete the check above"}</button>
           {err && <p className="err" role="alert">{err}</p>}
         </div>
+        {err && <ReportForm testCode="" />}
+        </>
       ) : (
         <>
           <div className={`wl-card test-status ${status}`} role="status" aria-live="polite">
@@ -130,6 +235,7 @@ export function TestYourAi() {
             <p>Test code: <code className="big-code">{code}</code> <button className="btn ghost small-btn" onClick={() => copy(code, "code")}>{copied === "code" ? "Copied" : "Copy"}</button></p>
             <p className="small">The code works for 15 minutes. Remove the Canal test connector from your AI app when you're done.</p>
           </div>
+          {status !== "connected" && <ReportForm testCode={code} />}
         </>
       )}
 

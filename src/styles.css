@@ -69,3 +69,4 @@ section.wrap.band{width:calc(100% - 2.5rem);max-width:calc(1040px - 2.5rem);marg
 .test-status.connected{border-color:#10b981;background:#ecfdf5}.test-status.signed_in{border-color:#f59e0b;background:#fffbeb}
 .big-code{font-size:1.3rem;letter-spacing:.12em;font-weight:700}
 .test-steps{border:1px solid var(--border);border-radius:14px;padding:.75rem 1rem;margin:.6rem 0;background:var(--surface)}.test-steps summary{font-weight:600;cursor:pointer}
+.report-form{position:relative;display:flex;flex-direction:column;gap:.8rem}.report-form label{display:flex;flex-direction:column;gap:.3rem;font-weight:600}.report-form input,.report-form select,.report-form textarea{font:inherit;font-weight:400;padding:.6rem .8rem;border:1px solid #cbd5e1;border-radius:10px;min-height:44px}.report-form select:focus-visible,.report-form textarea:focus-visible{outline:3px solid var(--coral);outline-offset:2px}
