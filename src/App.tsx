@@ -231,6 +231,11 @@ function Home() {
             </tr>))}</tbody>
         </table>
         <p className="small">Beta limits: receiving only, and up to 300 texts and 300 emails per month.</p>
+        <div className="feedback-refund">
+          <h3>Founding feedback refund</h3>
+          <p>The first 10 paid founding members can earn their $10 back by helping us build Canal. At the end of each of your first 3 months, fill out a short feedback form about how Canal is working for you, and we'll refund $3.33 per form ($10 total for all three). Honest feedback counts, good or bad.</p>
+          <p className="small">Founding Feedback Refund: The first 10 paid Founding members get up to their $10 Founders fee back. Submit one complete monthly feedback form for each of your first 3 paid months and we'll refund $3.33 per form, or $10 total for all three. Each month's form opens when that month ends and expires 30 days later. Missed a month? You can catch it up any time before it expires. Refunds go back to your original payment method within 14 days after we receive a complete form. Carrier, registration (10DLC), and outbound messaging fees can't be refunded. Your feedback can be positive, negative, or neutral; it doesn't affect your refund. We'll never quote you publicly unless you separately opt in. US-only beta. We may end this offer at any time, but forms already submitted will still be refunded. See <a href="/terms">Terms §7.3</a>.</p>
+        </div>
       </section>
 
       <section id="texting-faq" className="wrap">
